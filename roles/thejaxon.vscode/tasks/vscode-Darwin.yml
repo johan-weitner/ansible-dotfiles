@@ -1,0 +1,6 @@
+---
+- name: Install VSCode
+  homebrew_cask:
+    name: "{{ vscode }}"
+    state: present
+    install_options: force
