@@ -4,4 +4,5 @@
     name: "{{ vscode }}"
     state: present
     install_options: force
-  ignore_errors: yes
+  ignore_errors: true
+  become: false

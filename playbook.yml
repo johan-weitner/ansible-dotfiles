@@ -15,8 +15,35 @@
             61643834353134353634353134353631
 
 
-
+    # Install dependencies with Homebrew if MacOS
     tasks:
+    - name: Check if Homebrew is installed
+      command: which brew
+      register: brew_check
+      ignore_errors: yes
+
+    - name: Install Homebrew
+      shell: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      args:
+        executable: /bin/bash
+      when: brew_check.rc != 0
+
+    - name: Ensure Homebrew is up to date
+      command: brew update
+      when: brew_check.rc == 0
+      become: false
+
+    - name: Install dependencies with Homebrew
+      homebrew:
+        name:
+          - build-essential
+          - curl
+          - git
+        state: present
+      when: ansible_facts['os_family'] == 'Darwin'
+      become: false
+
+    # Else install dependencies with apt
     - name: Install dependencies
       apt:
         name:
@@ -25,30 +52,9 @@
           - file
           - git
           - snap
-          - python
+          # - python
         state: present
-
-    # - name: Ensure required packages are installed on Linux
-    #   apt:
-    #     name:
-    #       - build-essential
-    #       - curl
-    #       - file
-    #       - git
-    #       - snap
-    #     state: present
-    #   when: ansible_facts['os_family'] == 'Debian' or ansible_facts['os_family'] == 'RedHat'
-
-    - name: Check if snap is installed
-      command: which snap
-      register: snap_check
-      ignore_errors: yes
-
-    - name: Install snap if not installed
-      apt:
-        name: snapd
-        state: present
-      when: snap_check.rc != 0
+      when: ansible_facts['os_family'] != 'Darwin'
 
     - name: Ensure snapd service is started and enabled
       service:
@@ -56,6 +62,7 @@
         state: started
         enabled: yes
       when: snap_check.rc != 0
+      ignore_errors: yes
 
     - name: Install Homebrew on macOS
       shell: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -64,14 +71,14 @@
       when: ansible_facts['os_family'] == 'Darwin'
       ignore_errors: yes
 
-    - name: Install Homebrew on x86_64 Linux
-      shell: /usr/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-      args:
-        executable: /bin/bash
-      environment:
-        NONINTERACTIVE: "1"
-      when: ansible_facts['os_family'] != 'Darwin' and ansible_facts['architecture'] == 'x86_64'
-      ignore_errors: yes
+    # - name: Install Homebrew on x86_64 Linux
+    #   shell: /usr/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    #   args:
+    #     executable: /bin/bash
+    #   environment:
+    #     NONINTERACTIVE: "1"
+    #   when: ansible_facts['os_family'] != 'Darwin' and ansible_facts['architecture'] == 'x86_64'
+    #   ignore_errors: yes
 
     - name: Add Homebrew to PATH on macOS and Linux
       shell: echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.profile
@@ -131,12 +138,9 @@
             dest: ~/.zshrc
             line: "source ~/.oh-my-zsh/oh-my-zsh.sh"
             create: yes
-
-    - name: Set Github access token environment variable
-      command: echo $TEST_VAR
-      environment:
         TEST_VAR: "OK"
 
+    # To establish env vars, write export statements to .zshrc
     # - name: Set Github access token environment variable
     #   environment:
     #     GITHUB_ACCESS_TOKEN: "{{ github_access_token }}"
