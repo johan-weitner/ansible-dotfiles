@@ -76,21 +76,8 @@ bash_private:
     62356231373832366665666330366137646239303934343332306233386335653534333038336135
     373962636566626335316536346431393435
 
-flatpak_packages:
-  - md.obsidian.Obsidian
-
 k8s:
   repo_version: "v1.26"
-
-helm:
-  repos:
-    - name: traefik
-      url: https://helm.traefik.io/traefik
-
-go:
-  # packages:
-    # - package: github.com/stillmatic/chat@latest
-    #   cmd: chat
 
 ssh_key:
   lumen-windows-wsl: !vault |

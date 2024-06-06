@@ -1,0 +1,170 @@
+---
+  - name: Install VS Code, Alacritty, zsh, oh-my-zsh, Git, and MacOS plugins
+    hosts: all
+    become: yes
+    gather_facts: yes
+
+    vars:
+      github_access_token: !vault |
+            $ANSIBLE_VAULT;1.1;AES256
+            64393136353863396664353163396661
+            34353634353134353634353134353631
+            61643834353134353634353134353631
+            61643834353134353634353134353631
+            61643834353134353634353134353631
+            61643834353134353634353134353631
+
+
+
+    tasks:
+    - name: Install dependencies
+      apt:
+        name:
+          - build-essential
+          - curl
+          - file
+          - git
+          - snap
+        state: present
+
+    # - name: Ensure required packages are installed on Linux
+    #   apt:
+    #     name:
+    #       - build-essential
+    #       - curl
+    #       - file
+    #       - git
+    #       - snap
+    #     state: present
+    #   when: ansible_facts['os_family'] == 'Debian' or ansible_facts['os_family'] == 'RedHat'
+
+    - name: Check if snap is installed
+      command: which snap
+      register: snap_check
+      ignore_errors: yes
+
+    - name: Install snap if not installed
+      apt:
+        name: snapd
+        state: present
+      when: snap_check.rc != 0
+
+    - name: Ensure snapd service is started and enabled
+      service:
+        name: snapd
+        state: started
+        enabled: yes
+      when: snap_check.rc != 0
+
+    # - name: Install a package using snap
+    #   snap:
+    #     name: <package_name>
+    #     state: present
+    #   # Make sure this task runs only if snap is installed
+    #   when: snap_check.rc == 0 or (snap_check.rc != 0 and ansible_facts.packages.snapd is defined)
+
+    - name: Install Homebrew on macOS
+      shell: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      args:
+        executable: /bin/bash
+      when: ansible_facts['os_family'] == 'Darwin'
+
+    - name: Install Homebrew on x86_64 Linux
+      shell: /usr/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      args:
+        executable: /bin/bash
+      environment:
+        NONINTERACTIVE: "1"
+      when: ansible_facts['os_family'] != 'Darwin' and ansible_facts['architecture'] == 'x86_64'
+
+    - name: Add Homebrew to PATH on macOS and Linux
+      shell: echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.profile
+      args:
+        executable: /bin/bash
+      when: ansible_facts['os_family'] == 'Darwin' or ansible_facts['architecture'] == 'x86_64'
+
+    - name: Source Homebrew
+      shell: /bin/bash -c 'source ~/.profile'
+      args:
+        executable: /bin/bash
+      when: ansible_facts['os_family'] == 'Darwin' or ansible_facts['architecture'] == 'x86_64'
+
+    # - name: Install GPG
+    #   apt:
+    #     name: gpg
+    #     state: present
+    # - name: Add Microsoft GPG key
+    #   apt_key:
+    #     url: https://packages.microsoft.com/keys/microsoft.asc
+    #     state: present
+
+    # - name: Add VS Code repository
+    #   apt_repository:
+    #     repo: deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main
+    #     state: present
+
+    # - name: Update APT package cache
+    #   apt:
+    #     update_cache: yes
+
+    # - name: Install VS Code
+    #   apt:
+    #     name: vscode/stable
+    #     state: present
+
+    - name: Install Alacritty
+      package:
+        name: librust-alacritty-terminal-dev
+        state: present
+
+    - name: Install zsh
+      package:
+        name: zsh
+        state: present
+
+    - name: Install oh-my-zsh
+      git:
+        repo: https://github.com/robbyrussell/oh-my-zsh.git
+        dest: ~/.oh-my-zsh
+        clone: yes
+        update: yes
+
+    - name: Install MacOS plugins
+      block:
+        - name: Install MacOS plugins
+          package:
+            name: "{{ item }}"
+            state: present
+          loop:
+            - git
+            - zsh
+      when: ansible_facts['os_family'] == 'Darwin'
+
+    - name: Set zsh as default shell
+      user:
+        name: "{{ ansible_user }}"
+        shell: /bin/zsh
+
+    - name: Configure oh-my-zsh
+      block:
+        - name: Create .zshrc file
+          file:
+            path: ~/.zshrc
+            state: touch
+        - name: Add oh-my-zsh configuration to .zshrc
+          lineinfile:
+            dest: ~/.zshrc
+            line: "source ~/.oh-my-zsh/oh-my-zsh.sh"
+            create: yes
+
+    - name: Set Github access token environment variable
+      command: echo $TEST_VAR
+      environment:
+        TEST_VAR: "OK"
+
+    # - name: Set Github access token environment variable
+    #   environment:
+    #     GITHUB_ACCESS_TOKEN: "{{ github_access_token }}"
+
+    roles:
+      - thejaxon.vscode
