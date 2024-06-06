@@ -1,20 +1,41 @@
 #!/bin/bash
 
+# Check if the vault password file exists
+if [ ! -f ~/.config/vault/vault.secret ]; then
+  echo "Vault secret not found - exiting..."
+  exit 1
+fi
+
+# Function that installs Homebrew
+function install_homebrew() {
+  echo "Installing Homebrew..."
+  # /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+}
+
+# Function that installs Chocolatey
+function install_chocolatey() {
+  echo "Installing Chocolatey..."
+  # Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+}
+
 # Check if Ansible is installed
 if ! command -v ansible >/dev/null; then
   # Install Ansible if it's missing
   echo "Ansible is not installed. Installing..."
   if [[ "$(uname)" == "Darwin" ]]; then
     # MacOS
+    install_homebrew
     brew install ansible
   elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]]; then
     # Linux
     sudo apt-get update && sudo apt-get install -y ansible
   elif [[ "$(ver)" == *"Windows"* ]]; then
     # Windows
+    install_chocolatey
     choco install ansible
   fi
 fi
 
 # Execute the playbook
-ansible-playbook -i hosts.ini playbook.yml
+# ansible-playbook -i hosts.ini playbook.yml
+ansible-playbook playbook.yml -i hosts.ini --vault-password-file ~/.config/vault/vault.secret --ask-become-pass

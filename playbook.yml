@@ -36,7 +36,6 @@
     - name: Install dependencies with Homebrew
       homebrew:
         name:
-          - build-essential
           - curl
           - git
         state: present
@@ -61,24 +60,8 @@
         name: snapd
         state: started
         enabled: yes
-      when: snap_check.rc != 0
+      when: ansible_facts['os_family'] != 'Darwin' and snap_check.rc != 0
       ignore_errors: yes
-
-    - name: Install Homebrew on macOS
-      shell: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-      args:
-        executable: /bin/bash
-      when: ansible_facts['os_family'] == 'Darwin'
-      ignore_errors: yes
-
-    # - name: Install Homebrew on x86_64 Linux
-    #   shell: /usr/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    #   args:
-    #     executable: /bin/bash
-    #   environment:
-    #     NONINTERACTIVE: "1"
-    #   when: ansible_facts['os_family'] != 'Darwin' and ansible_facts['architecture'] == 'x86_64'
-    #   ignore_errors: yes
 
     - name: Add Homebrew to PATH on macOS and Linux
       shell: echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.profile
@@ -94,15 +77,11 @@
       when: ansible_facts['os_family'] == 'Darwin' or ansible_facts['architecture'] == 'x86_64'
       ignore_errors: yes
 
-    - name: Install Alacritty
-      package:
-        name: librust-alacritty-terminal-dev
-        state: present
-
     - name: Install zsh
       package:
         name: zsh
         state: present
+      become: no
 
     - name: Install oh-my-zsh
       git:
@@ -121,10 +100,12 @@
             - git
             - zsh
       when: ansible_facts['os_family'] == 'Darwin'
+      become: no
 
     - name: Set zsh as default shell
       user:
-        name: "{{ ansible_user }}"
+        # name: "{{ ansible_user }}"
+        name: "johanweitner"
         shell: /bin/zsh
 
     - name: Configure oh-my-zsh
@@ -138,7 +119,6 @@
             dest: ~/.zshrc
             line: "source ~/.oh-my-zsh/oh-my-zsh.sh"
             create: yes
-        TEST_VAR: "OK"
 
     # To establish env vars, write export statements to .zshrc
     # - name: Set Github access token environment variable
@@ -148,3 +128,4 @@
     roles:
       - thejaxon.vscode
       - 1password
+      - alacritty
