@@ -11,7 +11,6 @@
       register: brew_check
       ignore_errors: yes
       when: ansible_facts['os_family'] == 'Darwin'
-      ignore_errors: yes
 
     - name: Install Homebrew
       shell: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -221,4 +220,5 @@
       - cargo
       - thejaxon.vscode
       - 1password
+      - volta
       # - alacritty

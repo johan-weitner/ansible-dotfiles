@@ -1,30 +1,35 @@
 default_roles:
-  - system
+  - cargo
+  - thejaxon.vscode
   - 1password
-  - alacritty
-  - asciiquarium
-  - bat
-  - docker
-  - flatpak
-  - fonts
-  - fzf
-  - git
-  - lazygit
-  - lsd
-  - nala
-  - neofetch
-  - neovim
   - volta
-  - node
-  - pnpm
-  - obsidian
-  - python
-  - tldr
-  - tmate
-  - tmux
-  - zellij
-  - zoxide
-  - zsh
+
+  # - system
+  # - 1password
+  # - alacritty
+  # - asciiquarium
+  # - bat
+  # - docker
+  # - flatpak
+  # - fonts
+  # - fzf
+  # - git
+  # - lazygit
+  # - lsd
+  # - nala
+  # - neofetch
+  # - neovim
+  # - volta
+  # - node
+  # - pnpm
+  # - obsidian
+  # - python
+  # - tldr
+  # - tmate
+  # - tmux
+  # - zellij
+  # - zoxide
+  # - zsh
 
 git_creds:
 
