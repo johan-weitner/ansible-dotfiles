@@ -33,6 +33,10 @@ if ! command -v ansible >/dev/null; then
     # Windows
     install_chocolatey
     choco install ansible
+  else
+    #  Unknown OS - abort
+    echo "Unknown OS - exiting..."
+    exit 1
   fi
 fi
 
