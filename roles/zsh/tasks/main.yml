@@ -1,0 +1,47 @@
+---
+  - name: Install Homebrew on supported systems
+    become: true
+
+    block:
+      - name: Install zsh
+        package:
+          name: zsh
+          state: present
+        become: false
+
+      - name: Install oh-my-zsh
+        git:
+          repo: https://github.com/robbyrussell/oh-my-zsh.git
+          dest: ~/.oh-my-zsh
+          clone: yes
+          update: yes
+
+      - name: Install MacOS plugins
+        block:
+          - name: Install MacOS plugins
+            package:
+              name: "{{ item }}"
+              state: present
+            loop:
+              - git
+              - zsh
+        when: ansible_facts['os_family'] == 'Darwin'
+        become: false
+
+      - name: Set zsh as default shell
+        user:
+          # name: "{{ ansible_user }}"
+          name: "johanweitner"
+          shell: /bin/zsh
+
+      - name: Configure oh-my-zsh
+        block:
+          - name: Create .zshrc file
+            file:
+              path: ~/.zshrc
+              state: touch
+          - name: Add oh-my-zsh configuration to .zshrc
+            lineinfile:
+              dest: ~/.zshrc
+              line: "source ~/.oh-my-zsh/oh-my-zsh.sh"
+              create: yes

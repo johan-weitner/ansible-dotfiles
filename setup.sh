@@ -42,4 +42,4 @@ fi
 
 # Execute the playbook
 # ansible-playbook -i hosts.ini playbook.yml
-ansible-playbook playbook.yml -i hosts.ini --vault-password-file ~/.config/vault/vault.secret --ask-become-pass
+ansible-playbook playbook.yml -i hosts.ini --vault-password-file ~/.config/vault/vault.secret --ask-become-pass -u johanweitner

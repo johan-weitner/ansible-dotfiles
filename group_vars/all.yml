@@ -1,8 +1,13 @@
 default_roles:
+  - 1password
+  # - alacritty
   - cargo
   - thejaxon.vscode
-  - 1password
   - volta
+  - zsh
+
+
+  # zsh, ohmyzsh, macos-plugin, se4t shell, conf ohmyzsh + plugs, extact homebrew
 
   # - system
   # - 1password

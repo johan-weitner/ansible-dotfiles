@@ -6,6 +6,12 @@
     gather_facts: yes
 
     pre_tasks:
+    - name: Display ansible_user
+      ansible.builtin.debug:
+        var: ansible_user
+
+
+
     - name: Detect WSL
       ansible.builtin.import_tasks: pre_tasks/detect_wsl.yml
       tags:
@@ -34,47 +40,36 @@
       tags:
         - always
 
-    - name: Check if Homebrew is installed
-      command: which brew
-      register: brew_check
-      ignore_errors: yes
+    - name: Debug user
+      ansible.builtin.debug:
+        var: ansible_env['SUDO_USER']
+      tags:
+        - always
+
+    - name: Detect MacOS user directory
+      ansible.builtin.set_fact:
+        ansible_user_dir: "/Users/{{ ansible_user or ansible_env['SUDO_USER'] }}"
       when: ansible_facts['os_family'] == 'Darwin'
 
-    - name: Install Homebrew
-      shell: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-      args:
-        executable: /bin/bash
-      when: ansible_facts['os_family'] == 'Darwin' and brew_check.rc != 0
-      ignore_errors: yes
+    - name: Detect Linux user directory
+      ansible.builtin.set_fact:
+        ansible_user_dir: "/home/{{ ansible_user or ansible_env['SUDO_USER'] }}"
+      when: ansible_facts['os_family'] == 'Linux'
 
-    - name: Ensure Homebrew is up to date
-      command: brew update
-      when: ansible_facts['os_family'] == 'Darwin' and brew_check.rc == 0
-      become: false
-      ignore_errors: yes
+    - name: Detect Windows user directory
+      ansible.builtin.set_fact:
+        ansible_user_dir: "/Users/{{ ansible_user or ansible_env['SUDO_USER'] }}"
+      when: ansible_facts['os_family'] == 'Windows'
 
-    - name: Add Homebrew to PATH on Linux
-      shell: echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.profile
-      args:
-        executable: /bin/bash
-      when: ansible_facts['architecture'] == 'x86_64'
-      ignore_errors: yes
+    - name: Show detected user directory
+      ansible.builtin.debug:
+        var: ansible_user_dir
 
-    - name: Add Homebrew to PATH on macOS
-      shell: echo 'eval "$(/usr/local/Homebrew/bin/brew shellenv)"' >> ~/.profile
-      args:
-        executable: /bin/bash
-      when: ansible_facts['os_family'] == 'Darwin'
-      ignore_errors: yes
+    - name: Install HomeBrew
+      ansible.builtin.import_tasks: roles/homebrew/tasks/main.yml
+      tags:
+        - always
 
-    - name: Source Homebrew
-      shell: /bin/bash -c 'source ~/.profile'
-      args:
-        executable: /bin/bash
-      when: ansible_facts['os_family'] == 'Darwin'
-      ignore_errors: yes
-
-    # Install dependencies with Homebrew if MacOS
     - name: Install dependencies with Homebrew
       homebrew:
         name:
@@ -121,61 +116,24 @@
       tags:
         - always
 
-    # - name: Run roles
-    #   ansible.builtin.include_role:
-    #     apply:
-    #       tags:
-    #         - "{{ roles_item }}"
-    #     name: "{{ roles_item }}"
-    #   loop_control:
-    #     loop_var: roles_item
-    #   with_items: "{{ run_roles }}"
-    #   tags:
-    #     - always
+    - name: Test home dir
+      ansible.builtin.file:
+        path: "{{ansible_user_dir}}/TESTING"
+        state: touch
+        mode: u=rw,g=r,o=r
 
-    - name: Install zsh
-      package:
-        name: zsh
-        state: present
-      become: no
-
-    - name: Install oh-my-zsh
-      git:
-        repo: https://github.com/robbyrussell/oh-my-zsh.git
-        dest: ~/.oh-my-zsh
-        clone: yes
-        update: yes
-
-    - name: Install MacOS plugins
-      block:
-        - name: Install MacOS plugins
-          package:
-            name: "{{ item }}"
-            state: present
-          loop:
-            - git
-            - zsh
-      when: ansible_facts['os_family'] == 'Darwin'
-      become: no
-
-    - name: Set zsh as default shell
-      user:
-        # name: "{{ ansible_user }}"
-        name: "johanweitner"
-        shell: /bin/zsh
-
-    - name: Configure oh-my-zsh
-      block:
-        - name: Create .zshrc file
-          file:
-            path: ~/.zshrc
-            state: touch
-        - name: Add oh-my-zsh configuration to .zshrc
-          lineinfile:
-            dest: ~/.zshrc
-            line: "source ~/.oh-my-zsh/oh-my-zsh.sh"
-            create: yes
-
+    - name: Run roles
+      ansible.builtin.include_role:
+        apply:
+          tags:
+            - "{{ roles_item }}"
+        name: "{{ roles_item }}"
+      loop_control:
+        loop_var: roles_item
+      with_items: "{{ run_roles }}"
+      tags:
+        - always
+      ignore_errors: true
 
 
     # Handle secret keys, tokens, etc
@@ -184,101 +142,38 @@
         file: "./group_vars/all.yml"
         name: vars
 
-    - name: Delete tmp directory if it exists
-      ansible.builtin.file:
-        path: ./tmp
-        state: absent
+    - name: Write Git user name to Git config
+      ansible.builtin.shell:
+        cmd: "git config --global user.name {{ vars.git_creds.GIT_USER_NAME }}"
 
-    - name: Create tmp directory
-      ansible.builtin.file:
-        path: ./tmp
-        state: directory
-        mode: '0755'
+    - name: Write Git user email to Git config
+      ansible.builtin.shell:
+        cmd: "git config --global user.name {{ vars.git_creds.GIT_USER_EMAIL }}"
 
-    - name: Create target files in tmp directory
-      ansible.builtin.file:
-        path: ./tmp/{{ item.key }}
-        state: touch
-        mode: u=rw,g=r,o=r
-      loop: "{{ vars.git_creds | dict2items }}"
-
-    - name: Print secrets to tmp directory
+    - name: Write secret keys and tokens to profile
       ansible.builtin.lineinfile:
-        path: ./tmp/{{ item.key }}
-        line: 'export {{ item.key }}="{{ item.value }}"'
-      loop: "{{ vars.git_creds | dict2items }}"
-
-    - name: Assemble env vars from tmp directory
-      ansible.builtin.assemble:
-        src: ./tmp
-        dest: ./git_creds.txt
-
-
-
-    - name: Delete tmp directory if it exists
-      ansible.builtin.file:
-        path: ./tmp
-        state: absent
-
-    - name: Create tmp directory
-      ansible.builtin.file:
-        path: ./tmp
-        state: directory
-        mode: '0755'
-
-    - name: Create target files in tmp directory
-      ansible.builtin.file:
-        path: ./tmp/{{ item.key }}
-        state: touch
-        mode: u=rw,g=r,o=r
-      loop: "{{ vars.env_vars | dict2items }}"
-
-    - name: Print secrets to tmp directory
-      ansible.builtin.lineinfile:
-        path: ./tmp/{{ item.key }}
+        path: "{{ansible_user_dir}}/.profile"
         line: 'export {{ item.key }}="{{ item.value }}"'
       loop: "{{ vars.env_vars | dict2items }}"
 
-    - name: Assemble env vars from tmp directory
-      ansible.builtin.assemble:
-        src: ./tmp
-        dest: ./env-vars.txt
+    - name: Create private SSH key file
+      ansible.builtin.file:
+        path: "{{ansible_user_dir}}/.ssh/id_ed25519"
+        state: touch
+        mode: u=rw,g=r,o=r
 
-    # Write SSH keys directly to target
-    # - name: Delete tmp directory if it exists
-    #   ansible.builtin.file:
-    #     path: ./tmp
-    #     state: absent
+    - name: Create public SSH key file
+      ansible.builtin.file:
+        path: "{{ansible_user_dir}}/.ssh/id_ed25519.pub"
+        state: touch
+        mode: u=rw,g=r,o=r
 
-    # - name: Create tmp directory
-    #   ansible.builtin.file:
-    #     path: ./tmp
-    #     state: directory
-    #     mode: '0755'
+    - name: Print private SSH key file
+      ansible.builtin.lineinfile:
+        path: "{{ansible_user_dir}}/.ssh/id_ed25519"
+        line: "{{vars.ssh_keys.id_ed25519}}"
 
-    # - name: Create target files in tmp directory
-    #   ansible.builtin.file:
-    #     path: ./tmp/{{ item.key }}
-    #     state: touch
-    #     mode: u=rw,g=r,o=r
-    #   loop: "{{ vars.ssh_keys | dict2items }}"
-
-    # - name: Print secrets to tmp directory
-    #   ansible.builtin.lineinfile:
-    #     path: ./tmp/{{ item.key }}
-    #     line: '{{ item.value }}'
-    #   loop: "{{ vars.ssh_keys | dict2items }}"
-
-    # - name: Assemble env vars from tmp directory
-    #   ansible.builtin.assemble:
-    #     src: ./tmp
-    #     dest: ./ssh_keys.txt
-
-
-
-    roles:
-      - cargo
-      - thejaxon.vscode
-      - 1password
-      - volta
-      # - alacritty
+    - name: Print public SSH key file
+      ansible.builtin.lineinfile:
+        path: "{{ansible_user_dir}}/.ssh/id_ed25519.pub"
+        line: "{{vars.ssh_keys.id_ed25519_pub}}"
