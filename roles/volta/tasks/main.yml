@@ -1,0 +1,39 @@
+---
+  - name: "Volta | Detect Volta"
+    ansible.builtin.shell:
+      cmd: which volta
+    register: volta_exists
+
+  - name: "Node | Detect Node"
+    ansible.builtin.shell:
+      cmd: which node
+    register: node_exists
+
+  - name: "PNPM | Detect PNPM"
+    ansible.builtin.shell:
+      cmd: which pnpm
+    register: pnpm_exists
+
+  - name: "Volta | Install Volta"
+    when: not volta_exists
+    block:
+      - name: "Volta | Download Volta Install Script"
+        ansible.builtin.get_url:
+          url: https://get.volta.sh
+          dest: /{{ ansible_user_dir }}/get_volta.sh
+          force: true
+          mode: "0755"
+
+      - name: "Volta | Run the install script"
+        ansible.builtin.script:
+          cmd: /{{ ansible_user_dir }}/get_volta.sh
+
+  - name: Node - Install Node
+    when: not node_exists
+    ansible.builtin.shell:
+      cmd: volta install node
+
+  - name: PNPM - Install PNPM
+    when: not pnpm_exists
+    ansible.builtin.shell:
+      cmd: volta install node
