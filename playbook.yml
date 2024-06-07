@@ -21,17 +21,21 @@
       command: which brew
       register: brew_check
       ignore_errors: yes
+      when: ansible_facts['os_family'] == 'Darwin'
+      ignore_errors: yes
 
     - name: Install Homebrew
       shell: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       args:
         executable: /bin/bash
-      when: brew_check.rc != 0
+      when: ansible_facts['os_family'] == 'Darwin' and brew_check.rc != 0
+      ignore_errors: yes
 
     - name: Ensure Homebrew is up to date
       command: brew update
-      when: brew_check.rc == 0
+      when: ansible_facts['os_family'] == 'Darwin' and brew_check.rc == 0
       become: false
+      ignore_errors: yes
 
     - name: Install dependencies with Homebrew
       homebrew:
@@ -41,6 +45,7 @@
         state: present
       when: ansible_facts['os_family'] == 'Darwin'
       become: false
+      ignore_errors: yes
 
     # Else install dependencies with apt
     - name: Install dependencies
@@ -51,6 +56,7 @@
           - file
           - git
           - snap
+          - cargo
           # - python
         state: present
       when: ansible_facts['os_family'] != 'Darwin'
@@ -60,21 +66,21 @@
         name: snapd
         state: started
         enabled: yes
-      when: ansible_facts['os_family'] != 'Darwin' and snap_check.rc != 0
+      when: ansible_facts['os_family'] != 'Darwin'
       ignore_errors: yes
 
     - name: Add Homebrew to PATH on macOS and Linux
       shell: echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.profile
       args:
         executable: /bin/bash
-      when: ansible_facts['os_family'] == 'Darwin' or ansible_facts['architecture'] == 'x86_64'
+      when: ansible_facts['os_family'] == 'Darwin'
       ignore_errors: yes
 
     - name: Source Homebrew
       shell: /bin/bash -c 'source ~/.profile'
       args:
         executable: /bin/bash
-      when: ansible_facts['os_family'] == 'Darwin' or ansible_facts['architecture'] == 'x86_64'
+      when: ansible_facts['os_family'] == 'Darwin'
       ignore_errors: yes
 
     - name: Install zsh
@@ -126,6 +132,7 @@
     #     GITHUB_ACCESS_TOKEN: "{{ github_access_token }}"
 
     roles:
+      - cargo
       - thejaxon.vscode
       - 1password
-      - alacritty
+      # - alacritty

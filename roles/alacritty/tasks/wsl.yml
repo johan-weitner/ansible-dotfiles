@@ -1,9 +1,9 @@
 ---
 - name: Install Alacritty
   ansible.builtin.include_role:
-    name: winget
+    name: cargo
   vars:
-    winget_packages:
+    cargo_packages:
       - Alacritty.Alacritty
 
 - name: Copy Alacritty config into Windows
