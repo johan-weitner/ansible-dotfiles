@@ -1,19 +1,8 @@
 ---
-  - name: Install VS Code, Alacritty, zsh, oh-my-zsh, Git, and MacOS plugins
+  - name: SET UP A NEW MACHINE
     hosts: localhost
     become: yes
     gather_facts: yes
-
-    vars:
-      github_access_token: !vault |
-            $ANSIBLE_VAULT;1.1;AES256
-            64393136353863396664353163396661
-            34353634353134353634353134353631
-            61643834353134353634353134353631
-            61643834353134353634353134353631
-            61643834353134353634353134353631
-            61643834353134353634353134353631
-
 
     # Install dependencies with Homebrew if MacOS
     tasks:
@@ -21,17 +10,21 @@
       command: which brew
       register: brew_check
       ignore_errors: yes
+      when: ansible_facts['os_family'] == 'Darwin'
+      ignore_errors: yes
 
     - name: Install Homebrew
       shell: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       args:
         executable: /bin/bash
-      when: brew_check.rc != 0
+      when: ansible_facts['os_family'] == 'Darwin' and brew_check.rc != 0
+      ignore_errors: yes
 
     - name: Ensure Homebrew is up to date
       command: brew update
-      when: brew_check.rc == 0
+      when: ansible_facts['os_family'] == 'Darwin' and brew_check.rc == 0
       become: false
+      ignore_errors: yes
 
     - name: Install dependencies with Homebrew
       homebrew:
@@ -41,6 +34,7 @@
         state: present
       when: ansible_facts['os_family'] == 'Darwin'
       become: false
+      ignore_errors: yes
 
     # Else install dependencies with apt
     - name: Install dependencies
@@ -51,6 +45,7 @@
           - file
           - git
           - snap
+          - cargo
           # - python
         state: present
       when: ansible_facts['os_family'] != 'Darwin'
@@ -60,21 +55,21 @@
         name: snapd
         state: started
         enabled: yes
-      when: ansible_facts['os_family'] != 'Darwin' and snap_check.rc != 0
+      when: ansible_facts['os_family'] != 'Darwin'
       ignore_errors: yes
 
     - name: Add Homebrew to PATH on macOS and Linux
       shell: echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.profile
       args:
         executable: /bin/bash
-      when: ansible_facts['os_family'] == 'Darwin' or ansible_facts['architecture'] == 'x86_64'
+      when: ansible_facts['os_family'] == 'Darwin'
       ignore_errors: yes
 
     - name: Source Homebrew
       shell: /bin/bash -c 'source ~/.profile'
       args:
         executable: /bin/bash
-      when: ansible_facts['os_family'] == 'Darwin' or ansible_facts['architecture'] == 'x86_64'
+      when: ansible_facts['os_family'] == 'Darwin'
       ignore_errors: yes
 
     - name: Install zsh
@@ -120,12 +115,110 @@
             line: "source ~/.oh-my-zsh/oh-my-zsh.sh"
             create: yes
 
-    # To establish env vars, write export statements to .zshrc
-    # - name: Set Github access token environment variable
-    #   environment:
-    #     GITHUB_ACCESS_TOKEN: "{{ github_access_token }}"
+
+
+    # Handle secret keys, tokens, etc
+    - name: Get env variables
+      ansible.builtin.include_vars:
+        file: "./group_vars/all.yml"
+        name: vars
+
+    - name: Delete tmp directory if it exists
+      ansible.builtin.file:
+        path: ./tmp
+        state: absent
+
+    - name: Create tmp directory
+      ansible.builtin.file:
+        path: ./tmp
+        state: directory
+        mode: '0755'
+
+    - name: Create target files in tmp directory
+      ansible.builtin.file:
+        path: ./tmp/{{ item.key }}
+        state: touch
+        mode: u=rw,g=r,o=r
+      loop: "{{ vars.git_creds | dict2items }}"
+
+    - name: Print secrets to tmp directory
+      ansible.builtin.lineinfile:
+        path: ./tmp/{{ item.key }}
+        line: 'export {{ item.key }}="{{ item.value }}"'
+      loop: "{{ vars.git_creds | dict2items }}"
+
+    - name: Assemble env vars from tmp directory
+      ansible.builtin.assemble:
+        src: ./tmp
+        dest: ./git_creds.txt
+
+
+
+    - name: Delete tmp directory if it exists
+      ansible.builtin.file:
+        path: ./tmp
+        state: absent
+
+    - name: Create tmp directory
+      ansible.builtin.file:
+        path: ./tmp
+        state: directory
+        mode: '0755'
+
+    - name: Create target files in tmp directory
+      ansible.builtin.file:
+        path: ./tmp/{{ item.key }}
+        state: touch
+        mode: u=rw,g=r,o=r
+      loop: "{{ vars.env_vars | dict2items }}"
+
+    - name: Print secrets to tmp directory
+      ansible.builtin.lineinfile:
+        path: ./tmp/{{ item.key }}
+        line: 'export {{ item.key }}="{{ item.value }}"'
+      loop: "{{ vars.env_vars | dict2items }}"
+
+    - name: Assemble env vars from tmp directory
+      ansible.builtin.assemble:
+        src: ./tmp
+        dest: ./env-vars.txt
+
+
+    # - name: Delete tmp directory if it exists
+    #   ansible.builtin.file:
+    #     path: ./tmp
+    #     state: absent
+
+    # - name: Create tmp directory
+    #   ansible.builtin.file:
+    #     path: ./tmp
+    #     state: directory
+    #     mode: '0755'
+
+    # - name: Create target files in tmp directory
+    #   ansible.builtin.file:
+    #     path: ./tmp/{{ item.key }}
+    #     state: touch
+    #     mode: u=rw,g=r,o=r
+    #   loop: "{{ vars.ssh_keys | dict2items }}"
+
+    # - name: Print secrets to tmp directory
+    #   ansible.builtin.lineinfile:
+    #     path: ./tmp/{{ item.key }}
+    #     line: '{{ item.value }}'
+    #   loop: "{{ vars.ssh_keys | dict2items }}"
+
+    # - name: Assemble env vars from tmp directory
+    #   ansible.builtin.assemble:
+    #     src: ./tmp
+    #     dest: ./ssh_keys.txt
+
+
+
+
 
     roles:
+      - cargo
       - thejaxon.vscode
       - 1password
-      - alacritty
+      # - alacritty
