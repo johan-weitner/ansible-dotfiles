@@ -19,31 +19,31 @@
         depth: 1
         dest: "{{ entr_dir }}"
       ignore_errors: true
-      when: entr_exists.rc == 0
+      when: entr_exists.rc != 0
 
     - name: Entr | Configure
       ansible.builtin.shell:
         cmd: ./configure
         chdir: "{{ entr_dir }}"
       ignore_errors: true
-      when: entr_exists.rc == 0
+      when: entr_exists.rc != 0
 
     - name: Entr | Make test
       ansible.builtin.shell:
         cmd: make test
         chdir: "{{ entr_dir }}"
       ignore_errors: true
-      when: entr_exists.rc == 0
+      when: entr_exists.rc != 0
 
     - name: Entr | Make install
       ansible.builtin.shell:
         cmd: make install
         chdir: "{{ entr_dir }}"
       ignore_errors: true
-      when: entr_exists.rc == 0
+      when: entr_exists.rc != 0
 
     - name: Entr | Cleanup
       ansible.builtin.shell:
         cmd: rm -rf "{{ entr_dir }}"
       ignore_errors: true
-      when: entr_exists.rc == 0
+      when: entr_exists.rc != 0

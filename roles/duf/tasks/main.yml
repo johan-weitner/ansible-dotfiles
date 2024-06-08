@@ -7,9 +7,11 @@
   - name: Check if duf is installed
     ansible.builtin.shell:
       cmd: brew install duf
-    when: ansible_facts['os_family'] == 'Darwin' and duf_exists.rc == 0
+    when: ansible_facts['os_family'] == 'Darwin' and duf_exists.rc != 0
+    ignore_errors: true
 
   - name: Check if duf is installed
     ansible.builtin.shell:
       cmd: sudo apt install duf
-    when: ansible_facts['os_family'] == 'Linux' and duf_exists.rc == 0
+    when: ansible_facts['os_family'] == 'Linux' and duf_exists.rc != 0
+    ignore_errors: true

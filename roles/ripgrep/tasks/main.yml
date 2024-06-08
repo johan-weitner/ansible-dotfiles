@@ -7,9 +7,11 @@
   - name: Check if ripgrep is installed
     ansible.builtin.shell:
       cmd: brew install ripgrep
-    when: ansible_facts['os_family'] == 'Darwin' and ripgrep_exists.rc == 0
+    when: ansible_facts['os_family'] == 'Darwin' and ripgrep_exists.rc != 0
+    ignore_errors: true
 
   - name: Check if ripgrep is installed
     ansible.builtin.shell:
       cmd: sudo apt-get install ripgrep
-    when: ansible_facts['os_family'] == 'Linux' and ripgrep_exists.rc == 0
+    when: ansible_facts['os_family'] == 'Linux' and ripgrep_exists.rc != 0
+    ignore_errors: true
