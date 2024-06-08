@@ -5,7 +5,6 @@ default_roles:
   # - cargo
   - fonts
   - fzf
-  - git
   - lazygit
   - lsd
   - nala
