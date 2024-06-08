@@ -1,31 +1,29 @@
 default_roles:
-  - 1password
-  # - alacritty
+  # - 1password
   - bat
-  # - cargo
+  - dust
   - entr
-  - fonts
-  - fzf
-  - lazygit
-  - lsd
-  - nala
-  - neofetch
-  - obsidian
+  # - fonts
+  # - fzf
+  # - lazygit
+  # - lsd
+  # - nala
+  # - neofetch
+  # - obsidian
   - pet
   - python
   - ripgrep
   - tldr
-  - tmate
-  - tmux
-  - zellij
-  - zoxide
-  - thejaxon.vscode
-  - volta
-  - zsh
+  # - tmate
+  # - tmux
+  # - zellij
+  # - zoxide
+  # - thejaxon.vscode
+  # - volta
+  # - zsh
 
 
 
-# * entr - https://github.com/eradman/entr
 # * mc - https://midnight-commander.org/
 # * dust - https://github.com/bootandy/dust
 # * duf - https://github.com/muesli/duf

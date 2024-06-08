@@ -1,0 +1,10 @@
+---
+  - name: Check if dust is installed
+    ansible.builtin.shell:
+      cmd: which dust
+    register: dust_exists
+
+  - name: Install dust
+    ansible.builtin.shell:
+      cmd: brew install dust
+    when: dust_exists.rc == 0
