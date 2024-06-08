@@ -11,5 +11,5 @@
 
   - name: Check if ripgrep is installed
     ansible.builtin.shell:
-      cmd: $ sudo apt-get install ripgrep
+      cmd: sudo apt-get install ripgrep
     when: ansible_facts['os_family'] == 'Linux' and ripgrep_exists.rc == 0
