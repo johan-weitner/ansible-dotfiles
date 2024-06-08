@@ -4,25 +4,25 @@ default_roles:
   - duf
   - dust
   - entr
-  # - fonts
-  # - fzf
-  # - lazygit
-  # - lsd
-  # - nala
-  # - neofetch
-  # - obsidian
+  - fonts
+  - fzf
+  - lazygit
+  - lsd
+  - nala
+  - neofetch
+  - obsidian
   - pet
   - procs
   - python
   - ripgrep
   - tldr
-  # - tmate
-  # - tmux
-  # - zellij
-  # - zoxide
-  # - thejaxon.vscode
-  # - volta
-  # - zsh
+  - tmate
+  - tmux
+  - zellij
+  - zoxide
+  - thejaxon.vscode
+  - volta
+  - zsh
 
 
 
