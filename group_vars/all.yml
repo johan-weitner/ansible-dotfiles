@@ -12,6 +12,7 @@ default_roles:
   # - neofetch
   # - obsidian
   - pet
+  - procs
   - python
   - ripgrep
   - tldr

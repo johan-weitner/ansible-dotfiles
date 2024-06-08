@@ -1,0 +1,15 @@
+---
+  - name: Check if ripgrep is installed
+    ansible.builtin.shell:
+      cmd: which procs
+    register: procs_exists
+
+  - name: Install procs with Winget
+    ansible.builtin.shell:
+      cmd: winget install procs
+    when: ansible_facts['os_family'] == 'Windows' and procs_exists.rc == 0
+
+  - name: Install procs with Homebrew
+    ansible.builtin.shell:
+      cmd: brew install procs
+    when: ansible_facts['os_family'] != 'Windows' and procs_exists.rc == 0
