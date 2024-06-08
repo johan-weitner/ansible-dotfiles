@@ -10,7 +10,6 @@ default_roles:
   - lsd
   - nala
   - neofetch
-  - neovim
   - obsidian
   # - pet
   - python
