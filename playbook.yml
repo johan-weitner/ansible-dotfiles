@@ -81,6 +81,8 @@
           # - python
         state: present
       when: ansible_facts['os_family'] != 'Darwin'
+      become: true
+      ignore_errors:: true
 
     - name: Ensure snapd service is started and enabled
       service:
