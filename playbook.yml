@@ -34,14 +34,6 @@
       tags:
         - always
 
-    # - name: Install Python Watchdog
-    #   ansible.builtin.shell:
-    #     cmd: pip install -U watchdog
-    #   tags:
-    #     - always
-
-        # {{ ansible_user_dir }}
-
     # - name: Detect MacOS user directory
     #   ansible.builtin.set_fact:
     #     ansible_user_dir: "/Users/{{ ansible_user or ansible_env['SUDO_USER'] }}"
@@ -57,46 +49,46 @@
     #     ansible_user_dir: "/Users/{{ ansible_user or ansible_env['SUDO_USER'] }}"
     #   when: ansible_facts['os_family'] == 'Windows'
 
-    - name: Show detected user directory
-      ansible.builtin.debug:
-        var: ansible_user_dir
+    # - name: Show detected user directory
+    #   ansible.builtin.debug:
+    #     var: ansible_user_dir
 
-    # - name: Install HomeBrew
-    #   ansible.builtin.import_tasks: roles/homebrew/tasks/main.yml
-    #   tags:
-    #     - always
+    - name: Install HomeBrew
+      ansible.builtin.import_tasks: roles/homebrew/tasks/main.yml
+      tags:
+        - always
 
-    # - name: Install dependencies with Homebrew
-    #   homebrew:
-    #     name:
-    #       - curl
-    #       - git
-    #     state: present
-    #   when: ansible_facts['os_family'] == 'Darwin'
-    #   become: false
-    #   ignore_errors: yes
+    - name: Install dependencies with Homebrew
+      homebrew:
+        name:
+          - curl
+          - git
+        state: present
+      when: ansible_facts['os_family'] == 'Darwin'
+      become: false
+      ignore_errors: yes
 
-    # # Else install dependencies with apt
-    # - name: Install dependencies
-    #   apt:
-    #     name:
-    #       - build-essential
-    #       - curl
-    #       - file
-    #       - git
-    #       - snap
-    #       - cargo
-    #       # - python
-    #     state: present
-    #   when: ansible_facts['os_family'] != 'Darwin'
+    # Else install dependencies with apt
+    - name: Install dependencies
+      apt:
+        name:
+          - build-essential
+          - curl
+          - file
+          - git
+          - snap
+          - cargo
+          # - python
+        state: present
+      when: ansible_facts['os_family'] != 'Darwin'
 
-    # - name: Ensure snapd service is started and enabled
-    #   service:
-    #     name: snapd
-    #     state: started
-    #     enabled: yes
-    #   when: ansible_facts['os_family'] != 'Darwin'
-    #   ignore_errors: yes
+    - name: Ensure snapd service is started and enabled
+      service:
+        name: snapd
+        state: started
+        enabled: yes
+      when: ansible_facts['os_family'] != 'Darwin'
+      ignore_errors: yes
 
 
     tasks:
@@ -112,18 +104,18 @@
       tags:
         - always
 
-    # - name: Run roles
-    #   ansible.builtin.include_role:
-    #     apply:
-    #       tags:
-    #         - "{{ roles_item }}"
-    #     name: "{{ roles_item }}"
-    #   loop_control:
-    #     loop_var: roles_item
-    #   with_items: "{{ run_roles }}"
-    #   tags:
-    #     - always
-    #   ignore_errors: true
+    - name: Run roles
+      ansible.builtin.include_role:
+        apply:
+          tags:
+            - "{{ roles_item }}"
+        name: "{{ roles_item }}"
+      loop_control:
+        loop_var: roles_item
+      with_items: "{{ run_roles }}"
+      tags:
+        - always
+      ignore_errors: true
 
 
     # Handle secret keys, tokens, etc
@@ -132,19 +124,19 @@
         file: "./group_vars/all.yml"
         name: vars
 
-    # - name: Write Git user name to Git config
-    #   ansible.builtin.shell:
-    #     cmd: "git config --global user.name {{ vars.git_creds.GIT_USER_NAME }}"
+    - name: Write Git user name to Git config
+      ansible.builtin.shell:
+        cmd: "git config --global user.name {{ vars.git_creds.GIT_USER_NAME }}"
 
-    # - name: Write Git user email to Git config
-    #   ansible.builtin.shell:
-    #     cmd: "git config --global user.name {{ vars.git_creds.GIT_USER_EMAIL }}"
+    - name: Write Git user email to Git config
+      ansible.builtin.shell:
+        cmd: "git config --global user.name {{ vars.git_creds.GIT_USER_EMAIL }}"
 
-    # - name: Write secret keys and tokens to profile
-    #   ansible.builtin.lineinfile:
-    #     path: "{{ansible_user_dir}}/.profile"
-    #     line: 'export {{ item.key }}="{{ item.value }}"'
-    #   loop: "{{ vars.env_vars | dict2items }}"
+    - name: Write secret keys and tokens to profile
+      ansible.builtin.lineinfile:
+        path: "{{ansible_user_dir}}/.profile"
+        line: 'export {{ item.key }}="{{ item.value }}"'
+      loop: "{{ vars.env_vars | dict2items }}"
 
     # - name: Create private SSH key file
     #   ansible.builtin.file:

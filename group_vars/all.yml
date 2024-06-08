@@ -1,7 +1,24 @@
 default_roles:
   - 1password
   # - alacritty
-  - cargo
+  - bat
+  # - cargo
+  - fonts
+  - fzf
+  - git
+  - lazygit
+  - lsd
+  - nala
+  - neofetch
+  - neovim
+  - obsidian
+  # - pet
+  - python
+  - tldr
+  - tmate
+  - tmux
+  - zellij
+  - zoxide
   - thejaxon.vscode
   - volta
   - zsh

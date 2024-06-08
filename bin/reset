@@ -1,0 +1,7 @@
+#!/bin/bash
+
+DOTFILES_DIR="$HOME/.dotfiles"
+
+rm -rf $DOTFILES_DIR
+
+echo "Removed $DOTFILES_DIR"
