@@ -12,7 +12,6 @@ default_roles:
   - obsidian
   - pet
   - procs
-  - python
   - ripgrep
   - tldr
   # - tmate
