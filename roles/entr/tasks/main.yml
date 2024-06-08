@@ -1,15 +1,49 @@
 ---
-  - name: Check if ripgrep is installed
-    ansible.builtin.shell:
-      cmd: which ripgrep
-    register: ripgrep_exists
+  - name: Entr
+    block:
 
-  - name: Check if ripgrep is installed
-    ansible.builtin.shell:
-      cmd: brew install ripgrep
-    register: ansible_facts['os_family'] == 'Darwin' and not ripgrep_exists
+    - name: Check if entr is installed
+      ansible.builtin.shell:
+        cmd: which entr
+      register: entr_exists
+      ignore_errors: true
 
-  - name: Check if ripgrep is installed
-    ansible.builtin.shell:
-      cmd: $ sudo apt-get install ripgrep
-    register: ansible_facts['os_family'] == 'Linux' and not ripgrep_exists
+    - name: Set target dir
+      ansible.builtin.set_fact:
+        entr_dir: "{{ ansible_user_dir }}/.entr"
+      ignore_errors: true
+
+    - name: Entr | Clone Latest Version
+      ansible.builtin.git:
+        repo: https://github.com/eradman/entr.git
+        depth: 1
+        dest: "{{ entr_dir }}"
+      ignore_errors: true
+      when: entr_exists.rc == 0
+
+    - name: Entr | Configure
+      ansible.builtin.shell:
+        cmd: ./configure
+        chdir: "{{ entr_dir }}"
+      ignore_errors: true
+      when: entr_exists.rc == 0
+
+    - name: Entr | Make test
+      ansible.builtin.shell:
+        cmd: make test
+        chdir: "{{ entr_dir }}"
+      ignore_errors: true
+      when: entr_exists.rc == 0
+
+    - name: Entr | Make install
+      ansible.builtin.shell:
+        cmd: make install
+        chdir: "{{ entr_dir }}"
+      ignore_errors: true
+      when: entr_exists.rc == 0
+
+    - name: Entr | Cleanup
+      ansible.builtin.shell:
+        cmd: rm -rf "{{ entr_dir }}"
+      ignore_errors: true
+      when: entr_exists.rc == 0

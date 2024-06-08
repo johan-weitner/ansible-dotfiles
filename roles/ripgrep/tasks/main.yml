@@ -1,15 +1,15 @@
 ---
   - name: Check if ripgrep is installed
     ansible.builtin.shell:
-      cmd: which ripgrep
+      cmd: which rg
     register: ripgrep_exists
 
   - name: Check if ripgrep is installed
     ansible.builtin.shell:
       cmd: brew install ripgrep
-    register: ansible_facts['os_family'] == 'Darwin' and not ripgrep_exists
+    when: ansible_facts['os_family'] == 'Darwin' and ripgrep_exists.rc == 0
 
   - name: Check if ripgrep is installed
     ansible.builtin.shell:
       cmd: $ sudo apt-get install ripgrep
-    register: ansible_facts['os_family'] == 'Linux' and not ripgrep_exists
+    when: ansible_facts['os_family'] == 'Linux' and ripgrep_exists.rc == 0

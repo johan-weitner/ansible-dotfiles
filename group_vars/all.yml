@@ -3,6 +3,7 @@ default_roles:
   # - alacritty
   - bat
   # - cargo
+  - entr
   - fonts
   - fzf
   - lazygit
