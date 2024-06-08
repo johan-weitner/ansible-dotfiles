@@ -11,6 +11,7 @@
     command_result.rc != 0 or
     not command_result.stdout|regex_search('\w+\.\w+\.\w+')
   when: target_bat_version|length == 0
+  ignore_errors: true
 
 - name: BAT | GITHUB | Set latest version of bat
   ansible.builtin.set_fact:
