@@ -40,6 +40,12 @@ if ! command -v ansible >/dev/null; then
   fi
 fi
 
+# NEW_USER is set by $1, falling back on static string if missing
+NEW_USER="${1:-johanweitner}"
+
+echo "***** SETTING UP NEW MACHINE FOR USER $NEW_USER *****"
+echo ""
+
 # Execute the playbook
 # ansible-playbook -i hosts.ini playbook.yml
-ansible-playbook playbook.yml -i hosts.ini --vault-password-file ~/.config/vault/vault.secret --ask-become-pass -u johanweitner
+ansible-playbook playbook.yml -i hosts.ini --vault-password-file ~/.config/vault/vault.secret --ask-become-pass -u "$NEW_USER" --become-user "$NEW_USER"

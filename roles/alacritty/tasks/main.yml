@@ -7,3 +7,8 @@
   ansible.builtin.import_tasks: wsl.yml
   # when: ansible_host_environment_is_wsl
   when: ansible_os_family == 'Debian'
+
+- name: Run Windows Tasks
+  ansible.builtin.import_tasks: windows.yml
+  # when: ansible_host_environment_is_wsl
+  when: ansible_os_family == 'Windows'
