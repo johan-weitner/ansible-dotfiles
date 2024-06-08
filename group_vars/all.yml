@@ -18,7 +18,7 @@ default_roles:
   # - tmate
   - tmux
   - zellij
-  - zoxide
+  # - zoxide
   - thejaxon.vscode
   - volta
   - zsh
