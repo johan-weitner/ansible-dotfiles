@@ -1,5 +1,5 @@
 ---
-  - name: Install Homebrew on supported systems
+  - name: Install zsh on supported systems
     become: true
 
     block:
@@ -7,7 +7,7 @@
         package:
           name: zsh
           state: present
-        become: false
+        become: true
 
       - name: Install oh-my-zsh
         git:
@@ -36,6 +36,7 @@
           name: "johanweitner"
           shell: /bin/zsh
         ignore_errors: true
+        become: true
 
       - name: Configure oh-my-zsh
         block:
