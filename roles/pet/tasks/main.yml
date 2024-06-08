@@ -1,0 +1,21 @@
+---
+  - name: Install pet on MacOS
+    shell: brew install knqyf263/pet/pet
+    args:
+      executable: /bin/bash
+    when: ansible_facts['os_family'] == 'Darwin'
+    ignore_errors: true
+
+  - name: Download pet archive on Linux
+    shell: wget https://github.com/knqyf263/pet/releases/download/v0.3.6/pet_0.3.6_linux_amd64.deb
+    args:
+      executable: /bin/bash
+    when: ansible_facts['os_family'] == 'Linux'
+    ignore_errors: true
+
+  - name: Install pet on Linux
+    shell: dpkg -i pet_0.3.6_linux_amd64.deb
+    args:
+      executable: /bin/bash
+    when: ansible_facts['os_family'] == 'Linux'
+    ignore_errors: true

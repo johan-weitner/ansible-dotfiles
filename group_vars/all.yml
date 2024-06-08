@@ -10,7 +10,7 @@ default_roles:
   - nala
   - neofetch
   - obsidian
-  # - pet
+  - pet
   - python
   - tldr
   - tmate
