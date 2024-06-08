@@ -15,6 +15,7 @@
           dest: ~/.oh-my-zsh
           clone: yes
           update: yes
+        ignore_errors: true
 
       - name: Install MacOS plugins
         block:
@@ -27,12 +28,14 @@
               - zsh
         when: ansible_facts['os_family'] == 'Darwin'
         become: false
+        ignore_errors: true
 
       - name: Set zsh as default shell
         user:
           # name: "{{ ansible_user }}"
           name: "johanweitner"
           shell: /bin/zsh
+        ignore_errors: true
 
       - name: Configure oh-my-zsh
         block:
@@ -40,8 +43,10 @@
             file:
               path: ~/.zshrc
               state: touch
+            ignore_errors: true
           - name: Add oh-my-zsh configuration to .zshrc
             lineinfile:
               dest: ~/.zshrc
               line: "source ~/.oh-my-zsh/oh-my-zsh.sh"
               create: yes
+            ignore_errors: true
