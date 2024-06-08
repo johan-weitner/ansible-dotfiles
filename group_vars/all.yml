@@ -7,7 +7,7 @@ default_roles:
   - fonts
   - fzf
   - lazygit
-  - lsd
+  # - lsd
   - nala
   - neofetch
   - obsidian
@@ -16,7 +16,7 @@ default_roles:
   - python
   - ripgrep
   - tldr
-  - tmate
+  # - tmate
   - tmux
   - zellij
   - zoxide
@@ -24,7 +24,7 @@ default_roles:
   - volta
   - zsh
 
-
+# Google ZX
 
 # * mc - https://midnight-commander.org/
 
