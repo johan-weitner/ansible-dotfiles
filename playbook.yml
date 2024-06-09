@@ -105,18 +105,29 @@
       tags:
         - always
 
-    # - name: Run roles
-    #   ansible.builtin.include_role:
-    #     apply:
-    #       tags:
-    #         - "{{ roles_item }}"
-    #     name: "{{ roles_item }}"
-    #   loop_control:
-    #     loop_var: roles_item
-    #   with_items: "{{ run_roles }}"
-    #   tags:
-    #     - always
-    #   ignore_errors: true
+    - name: Run roles
+      ansible.builtin.include_role:
+        apply:
+          tags:
+            - "{{ roles_item }}"
+        name: "{{ roles_item }}"
+      loop_control:
+        loop_var: roles_item
+      with_items: "{{ run_roles }}"
+      tags:
+        - always
+      ignore_errors: true
+
+    - name: Run CLI roles (casks)
+      ansible.builtin.shell:
+        cmd: "brew list {{ item }} || brew install --cask {{ item }}"
+      loop_control:
+        loop_var: item
+      when: ansible_facts['os_family'] != 'Windows'
+      ignore_errors: yes
+      loop:
+        - warp
+        - alacritty
 
     - name: Run CLI roles
       ansible.builtin.shell:
@@ -155,11 +166,9 @@
         - awk
         - yazi
         - jesseduffield/lazygit/lazygit
-        - warp
         - git-extras
         - watson
         - zsh-navigation-tools
-        - alacritty
         - rmlint
         - rclone
         - ncurses
@@ -172,11 +181,11 @@
         - fastfetch
         - zx
 
-    # # Handle secret keys, tokens, etc
-    # - name: Get env variables
-    #   ansible.builtin.include_vars:
-    #     file: "./group_vars/all.yml"
-    #     name: vars
+    # Handle secret keys, tokens, etc
+    - name: Get env variables
+      ansible.builtin.include_vars:
+        file: "./group_vars/all.yml"
+        name: vars
 
     # - name: Write Git user name to Git config
     #   ansible.builtin.shell:
@@ -186,11 +195,11 @@
     #   ansible.builtin.shell:
     #     cmd: "git config --global user.name {{ vars.git_creds.GIT_USER_EMAIL }}"
 
-    # - name: Write secret keys and tokens to profile
-    #   ansible.builtin.lineinfile:
-    #     path: "{{ansible_user_dir}}/.profile"
-    #     line: 'export {{ item.key }}="{{ item.value }}"'
-    #   loop: "{{ vars.env_vars | dict2items }}"
+    - name: Write secret keys and tokens to profile
+      ansible.builtin.lineinfile:
+        path: "{{ansible_user_dir}}/.profile"
+        line: 'export {{ item.key }}="{{ item.value }}"'
+      loop: "{{ vars.env_vars | dict2items }}"
 
     # - name: Create private SSH key file
     #   ansible.builtin.file:
