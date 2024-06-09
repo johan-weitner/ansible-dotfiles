@@ -32,8 +32,10 @@
     when: node_exists.rc != 0
     ansible.builtin.shell:
       cmd: volta install node
+    ignore_errors: true
 
   - name: PNPM - Install PNPM
     when: pnpm_exists.rc != 0
     ansible.builtin.shell:
       cmd: volta install node
+    ignore_errors: true
