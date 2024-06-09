@@ -56,5 +56,18 @@ git --version
 git config --global user.name "Johan Weitner"
 git config --global user.email "johanweitner@gmail.com"
 
+# Get Ansible playbook and initialize a playbook run
+$url = "https://raw.githubusercontent.com/johan-weitner/ansible-dotfiles/main/bin/dotfiles"
+$scriptPath = "C:\temp\dotfiles"
+
+try {
+    Invoke-WebRequest -Uri $url -OutFile $scriptPath
+    Write-Host "File downloaded successfully!"
+    # Invoke WSL to execute the shell script
+    wsl bash -c "bash $scriptPath"
+} catch {
+    Write-Error "Error downloading file: $_"
+}
+
 echo ""
 echo "***** Windows setup done *****"
