@@ -123,7 +123,7 @@
         cmd: "brew list {{ item }} || brew install --cask {{ item }}"
       loop_control:
         loop_var: item
-      when: ansible_facts['os_family'] != 'Windows'
+      when: ansible_facts['os_family'] != 'Linux'
       ignore_errors: yes
       loop:
         - warp
