@@ -13,6 +13,7 @@
         args:
           executable: /bin/bash
         when: brew_check.rc != 0
+        become: true
         ignore_errors: true
 
       - name: Ensure Homebrew is up to date
