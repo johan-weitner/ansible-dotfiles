@@ -23,6 +23,8 @@ default_roles:
   - zsh
 
 # Google ZX
+# brew install fastfetch
+# brew install zx
 
 # * mc - https://midnight-commander.org/
 
