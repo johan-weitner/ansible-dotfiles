@@ -22,71 +22,31 @@ default_roles:
   - volta
   - zsh
 
-# Google ZX
 # brew install fastfetch
 # brew install zx
+# brew install yudai/gotty/gotty
+# brew install knqyf263/pet/pet
+# brew install jesseduffield/lazygit/lazygit
+# brew install --cask warp
+# brew install --cask alacritty
 
-# * mc - https://midnight-commander.org/
 
-# * duf - https://github.com/muesli/duf
-# * procs - https://github.com/dalance/procs
-# * httpie - https://github.com/httpie/cli?tab=readme-ov-file
-# * CoreUtils - https://www.gnu.org/software/coreutils/manual/coreutils.html
-# * Ddrescue - https://www.gnu.org/software/ddrescue/ddrescue.html
-# * OneFetch - https://onefetch.dev/
-# * Gotty - https://github.com/yudai/gotty
-# * mitmproxy - https://mitmproxy.org/#mitmproxy
-# * howdoi - https://gleitz.github.io/howdoi/usage/
-# * tldr - https://github.com/tldr-pages/tldr?tab=readme-ov-file
-# * scc - https://github.com/boyter/scc
-# * yank - https://github.com/mptre/yank
-# * miller - https://github.com/johnkerl/miller?tab=readme-ov-file
-# * difftastic - https://difftastic.wilfred.me.uk/
-# * jq - https://stedolan.github.io/jq/
-# * f3 - https://fight-flash-fraud.readthedocs.io/en/stable/
-# * NetHogs - https://github.com/raboof/nethogs
-# * fdupes - https://github.com/adrianlopezroche/fdupes
-# * svgo - https://github.com/svg/svgo
-# * yt-dlp - https://github.com/yt-dlp/yt-dlp
-# * pet - https://github.com/knqyf263/pet
-# * ps_mem - https://github.com/pixelb/ps_mem
-# * cheat.sh - https://cheat.sh/
-# * LZ4 - https://lz4.org/
-# * asciinema - https://asciinema.org/
-# * [diff-so-fancy](https://github.com/so-fancy/diff-so-fancy?tab=readme-ov-file)
-# * Pandoc - https://pandoc.org/
-# * [Git Delta](https://github.com/dandavison/delta#get-started)
-# * sed, awk
-# * [Yazi](https://yazi-rs.github.io/docs/installation/) - File manager written in Rust
-# * [Better Commits](https://github.com/Everduin94/better-commits)
-# * [Better Branch](https://github.com/iamthen0ise/better-branch/blob/stable/README.md)
-# * [LazyGit](https://github.com/jesseduffield/lazygit)
-# * [OpenCommit](https://github.com/di-sukharev/opencommit) - AI-generated commit messages
-# * [Warp](https://www.warp.dev/?utm_source=github&utm_medium=referral&utm_campaign=fzf_20240209) - **Terminal for Mac & Linux**
-# * [AutoJump](https://github.com/wting/autojump#installation)
-# 	* [ZSH Plugin](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/autojump)
-# * [DirEnv](https://github.com/direnv/direnv)
-# 	* ZSH Plugin
-# * [Todo.sh](https://github.com/todotxt/todo.txt-cli?tab=readme-ov-file)
-# * [DNote](https://www.getdnote.com/) - Command Line Notebook
-# * [Git-Extras](https://github.com/tj/git-extras)
-# * [Watson](https://tailordev.github.io/Watson/) - Time keeping
-# * [ZSH-navigation-Tools](https://github.com/z-shell/zsh-navigation-tools)
-# * [Yazi](https://yazi-rs.github.io/docs/installation/) - File manager written in Rust
-# * [Alacritty](https://alacritty.org/index.html) - Lightweight terminal emulator
-# 	* [Configure Alacritty on Windows](https://medium.com/@pachoyan/configure-alacritty-on-windows-b8df88a747ba)
-# 	* [My config](https://raw.githubusercontent.com/johan-weitner/dotfiles/main/.config/alacritty/alacritty.toml?token=GHSAT0AAAAAACHPF7VVOLCHXHP3VQJIBHJEZR3DKAQ)
-# * [CLink](https://chrisant996.github.io/clink/clink.html)
-# * [rmlint](https://rmlint.readthedocs.io/en/latest/) - Clean file duplicates
-# * [rclone](https://rclone.org/) - rsync w xtra features
-# * [NCurses](https://dev.yorhel.nl/ncdu) - Disk usage tool
-# * [BTop](https://github.com/aristocratos/btop?tab=readme-ov-file#installation) - Best system monitor
-# * [ntfy](https://ntfy.readthedocs.io/en/v2.0.1/) - Notification tool
-# * [duplicacy](https://github.com/gilbertchen/duplicacy/wiki) - Backup tool
-# * [micro](https://micro-editor.github.io/) - nano-like editor, but better
-# * [ShellCheck](https://www.shellcheck.net/) - Shell script linter
-# * [Zgenom](https://github.com/jandamm/zgenom?tab=readme-ov-file#migration-from-zgen) - ZSH PLugin Manager
-# * zellij
+
+
+# pip install ps_mem
+
+# scoop install cht # Windows - cheat.sh
+# curl -s https://cht.sh/:cht.sh | sudo tee /usr/local/bin/cht.sh && sudo chmod +x /usr/local/bin/cht.sh
+
+        # - todo.sh
+        # - dnote
+        # - opencommit
+        # - better-commits
+        # - better-branch
+        # - sed
+        # - ps_mem
+        # - cheat.sh
+        # - svgo
 
 
   # - system
