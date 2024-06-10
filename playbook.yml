@@ -144,8 +144,8 @@
         - coreutils
         - ddrescue
         - onefetch
-        - yudai/gotty/gotty
-        - mitmproxy
+        # - yudai/gotty/gotty
+        # - mitmproxy
         - howdoi
         - tldr
         - scc
@@ -174,7 +174,7 @@
         - ncurses
         - btop
         - ntfy
-        - duplicacy
+        # - duplicacy
         - micro
         - shellcheck
         - zellij
