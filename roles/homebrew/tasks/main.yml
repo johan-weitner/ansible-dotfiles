@@ -9,9 +9,9 @@
             - build-essential
             - curl
             - file
-            - git
           state: present
         when: ansible_facts['os_family'] == 'Debian' or ansible_facts['os_family'] == 'RedHat'
+        become: true
 
       - name: Install Homebrew on macOS
         shell: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -26,18 +26,21 @@
         environment:
           NONINTERACTIVE: "1"
         when: ansible_facts['os_family'] != 'Darwin' and ansible_facts['architecture'] == 'x86_64'
+        become: true
 
       - name: Add Homebrew to PATH on macOS and Linux
         shell: echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.profile
         args:
           executable: /bin/bash
         when: ansible_facts['os_family'] == 'Darwin' or ansible_facts['architecture'] == 'x86_64'
+        become: true
 
       - name: Source Homebrew
         shell: /bin/bash -c 'source ~/.profile'
         args:
           executable: /bin/bash
         when: ansible_facts['os_family'] == 'Darwin' or ansible_facts['architecture'] == 'x86_64'
+        become: true
 
 
       # - name: Check if Homebrew is installed

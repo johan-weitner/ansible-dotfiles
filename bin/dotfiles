@@ -118,6 +118,10 @@ function linux_setup() {
     _task "Installing Python3 Watchdog"
     _cmd "sudo apt install python3-watchdog"
   fi
+  if ! dpkg -s git >/dev/null 2>&1; then
+    _task "Installing Git"
+    _cmd "sudo apt-get install -y git"
+  fi
 }
 
 function macos_setup() {
