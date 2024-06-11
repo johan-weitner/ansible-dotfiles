@@ -121,23 +121,23 @@
     #     - always
     #   ignore_errors: true
 
-    - name: Run CLI roles (casks)
-      ansible.builtin.shell:
-        cmd: "brew list {{ item }} || brew install --cask {{ item }}"
-      loop_control:
-        loop_var: item
-      when: ansible_facts['os_family'] != 'Linux'
-      ignore_errors: yes
-      loop:
-        - warp
-        - alacritty
+    # - name: Run CLI roles (casks)
+    #   ansible.builtin.shell:
+    #     cmd: "brew list {{ item }} || brew install --cask {{ item }}"
+    #   loop_control:
+    #     loop_var: item
+    #   when: ansible_facts['os_family'] != 'Linux'
+    #   ignore_errors: yes
+    #   loop:
+    #     - warp
+    #     - alacritty
 
-    - name: Run CLI roles
+    - name: Run CLI roles for MacOS
       ansible.builtin.shell:
         cmd: "brew list {{ item }} || brew install {{ item }}"
       loop_control:
         loop_var: item
-      when: ansible_facts['os_family'] != 'Windows'
+      when: ansible_facts['os_family'] == 'Darwin'
       ignore_errors: yes
       loop:
         - mc
@@ -183,6 +183,60 @@
         - zellij
         - fastfetch
         - zx
+
+    - name: Run CLI roles for Linux
+      apt:
+        update_cache: true
+        pkg:
+          - mc
+          - duf
+          - procs
+          - httpie
+          - coreutils
+          - ddrescue
+          - onefetch
+          # - yudai/gotty/gotty
+          # - mitmproxy
+          - howdoi
+          - tldr
+          - scc
+          - yank
+          - miller
+          - difftastic
+          - jq
+          - f3
+          - nethogs
+          - fdupes
+          - yt-dlp
+          - knqyf263/pet/pet
+          - lz4
+          - asciinema
+          - diff-so-fancy
+          - pandoc
+          - git-delta
+          - awk
+          - yazi
+          - jesseduffield/lazygit/lazygit
+          - git-extras
+          - watson
+          - zsh-navigation-tools
+          - rmlint
+          - rclone
+          - ncurses
+          - btop
+          - ntfy
+          # - duplicacy
+          - micro
+          - shellcheck
+          - zellij
+          - fastfetch
+          - zx
+        state: latest
+      # register: task_result
+      # until: not task_result.failed
+      retries: 1
+      # when: ansible_facts['os_family'] == 'Linux'
+      ignore_errors: true
 
     # Handle secret keys, tokens, etc
     - name: Get env variables

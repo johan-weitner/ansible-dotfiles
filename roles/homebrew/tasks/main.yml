@@ -19,27 +19,27 @@
           executable: /bin/bash
         when: ansible_facts['os_family'] == 'Darwin'
 
-      - name: Install Homebrew on x86_64 Linux
-        shell: /usr/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        args:
-          executable: /bin/bash
-        environment:
-          NONINTERACTIVE: "1"
-        when: ansible_facts['os_family'] != 'Darwin' and ansible_facts['architecture'] == 'x86_64'
-        become: true
+      # - name: Install Homebrew on x86_64 Linux
+      #   shell: /usr/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      #   args:
+      #     executable: /bin/bash
+      #   environment:
+      #     NONINTERACTIVE: "1"
+      #   when: ansible_facts['os_family'] != 'Darwin' and ansible_facts['architecture'] == 'x86_64'
+        # become: true
 
       - name: Add Homebrew to PATH on macOS and Linux
         shell: echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.profile
         args:
           executable: /bin/bash
-        when: ansible_facts['os_family'] == 'Darwin' or ansible_facts['architecture'] == 'x86_64'
+        when: ansible_facts['os_family'] == 'Darwin'
         become: true
 
       - name: Source Homebrew
         shell: /bin/bash -c 'source ~/.profile'
         args:
           executable: /bin/bash
-        when: ansible_facts['os_family'] == 'Darwin' or ansible_facts['architecture'] == 'x86_64'
+        when: ansible_facts['os_family'] == 'Darwin'
         become: true
 
 
