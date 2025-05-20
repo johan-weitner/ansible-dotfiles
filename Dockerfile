@@ -1,13 +1,21 @@
-FROM ubuntu:22.04
+# Dockerfile
 
-RUN apt update && apt install  openssh-server sudo -y
+# ==> Choose a base image to emulate Linux distribution...
+FROM alpinelinux/ansible
+# FROM williamyeh/ansible:ubuntu14.04
+#FROM williamyeh/ansible:debian9
+#FROM williamyeh/ansible:debian8
+#FROM williamyeh/ansible:centos7
+#FROM williamyeh/ansible:alpine3
 
-RUN useradd -rm -s /bin/bash -g root -G sudo -u 1000 node
 
-RUN  echo 'node:node1234' | chpasswd
+# ==> Copying Ansible playbook...
+WORKDIR /tmp
+COPY  .  /tmp
 
-RUN service ssh start
+# ==> Creating inventory file...
+RUN echo localhost > inventory
 
-EXPOSE 22
-
-CMD ["/usr/sbin/sshd","-D"]
+# ==> Executing Ansible...
+# RUN ansible-playbook -i inventory playbook.yml \
+#       --connection=local --sudo

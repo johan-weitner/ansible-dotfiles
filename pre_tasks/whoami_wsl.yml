@@ -1,18 +1,22 @@
 ---
-- name: Detect Windows Current User
-  ansible.builtin.shell:
-    cmd: $env:UserName
+- name: Get Windows User from WSL
+  shell: |
+    if command -v cmd.exe >/dev/null 2>&1; then
+      cmd.exe /c "echo %USERNAME%" || powershell.exe -Command "$env:UserName"
+    else
+      echo ""
+    fi
   register: windows_user
-  changed_when: false
-  failed_when: windows_user.rc != 0
   args:
-    executable: powershell.exe
+    executable: /bin/sh
+  changed_when: false
+  failed_when: false
 
-- name: Register Windows Current User
-  ansible.builtin.set_fact:
-    wsl_host_user: "{{ windows_user.stdout }}"
-  when: host_user is not defined
+- name: Register Windows User
+  set_fact:
+    host_user: "{{ windows_user.stdout | trim }}"
+  when: windows_user.stdout is defined and windows_user.stdout | trim != "" and host_user is not defined
 
-- name: DEBUG
-  ansible.builtin.debug:
-    msg: "wsl_host_user: {{ wsl_host_user }}"
+- name: Show Detected User
+  debug:
+    msg: "Detected WSL user: {{ host_user | default('not detected') }}"
