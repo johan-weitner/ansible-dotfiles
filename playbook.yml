@@ -7,57 +7,58 @@
 
     pre_tasks:
     - name: Detect WSL
-      ansible.builtin.import_tasks: pre_tasks/detect_wsl.yml
+      import_tasks: pre_tasks/detect_wsl.yml
       tags:
         - always
 
     - name: Detect wsl
-      ansible.builtin.debug:
+      debug:
         var: ansible_host_environment_is_wsl
       tags:
         - always
 
     - name: Confirm Windows PowerShell Execution Policy
-      ansible.builtin.import_tasks: pre_tasks/powershell_executionpolicy.yml
+      import_tasks: pre_tasks/powershell_executionpolicy.yml
       when: ansible_host_environment_is_wsl
       tags:
         - always
       ignore_errors: true
 
     - name: Detect Host User
-      ansible.builtin.import_tasks: pre_tasks/whoami_wsl.yml
+      import_tasks: pre_tasks/whoami_wsl.yml
       when: ansible_host_environment_is_wsl
       tags:
         - always
       ignore_errors: true
 
     - name: Detect Host User
-      ansible.builtin.import_tasks: pre_tasks/whoami.yml
+      import_tasks: pre_tasks/whoami.yml
       tags:
         - always
       ignore_errors: true
 
-    # - name: Detect MacOS user directory
-    #   ansible.builtin.set_fact:
-    #     ansible_user_dir: "/Users/{{ ansible_user or ansible_env['SUDO_USER'] }}"
-    #   when: ansible_facts['os_family'] == 'Darwin'
+    - name: Detect MacOS user directory
+      set_fact:
+        ansible_user_dir: "/Users/{{ ansible_user | default(lookup('env', 'USER')) }}"
+      when: ansible_facts['os_family'] == 'Darwin'
 
-    # - name: Detect Linux user directory
-    #   ansible.builtin.set_fact:
-    #     ansible_user_dir: "/home/{{ ansible_user or ansible_env['SUDO_USER'] }}"
-    #   when: ansible_facts['os_family'] == 'Linux'
+    - name: Detect Linux user directory
+      set_fact:
+        ansible_user_dir: "/home/{{ ansible_user | default(lookup('env', 'USER')) }}"
+      when: ansible_facts['os_family'] == 'Linux' or ansible_facts['os_family'] == 'Alpine'
 
-    # - name: Detect Windows user directory
-    #   ansible.builtin.set_fact:
-    #     ansible_user_dir: "/Users/{{ ansible_user or ansible_env['SUDO_USER'] }}"
-    #   when: ansible_facts['os_family'] == 'Windows'
+    - name: Detect Windows user directory
+      set_fact:
+        ansible_user_dir: "/Users/{{ ansible_user | default(lookup('env', 'USER')) }}"
+      when: ansible_facts['os_family'] == 'Windows'
 
-    # - name: Show detected user directory
-    #   ansible.builtin.debug:
-    #     var: ansible_user_dir
+    - name: Show detected user directory
+      debug:
+        var: ansible_user_dir
 
     - name: Install HomeBrew
-      ansible.builtin.import_tasks: roles/homebrew/tasks/main.yml
+      import_tasks: roles/homebrew/tasks/main.yml
+      when: ansible_facts['os_family'] == 'Darwin'
       tags:
         - always
 
@@ -72,7 +73,8 @@
       ignore_errors: yes
 
     # Else install dependencies with apt
-    - name: Install dependencies
+    # Install dependencies with apt for Debian/Ubuntu
+    - name: Install dependencies with apt
       apt:
         name:
           - build-essential
@@ -83,33 +85,49 @@
           - cargo
           # - python
         state: present
-      when: ansible_facts['os_family'] == 'Linux'
+      when: ansible_facts['os_family'] == 'Debian'
       become: true
+      ignore_errors: true
 
+    # Install dependencies with apk for Alpine
+    - name: Install dependencies with apk
+      apk:
+        name:
+          - build-base
+          - curl
+          - file
+          - git
+          - cargo
+        state: present
+      when: ansible_facts['os_family'] == 'Alpine'
+      become: true
+      ignore_errors: true
+
+    # Ensure snapd service is started and enabled (only for systems that use snapd)
     - name: Ensure snapd service is started and enabled
       service:
         name: snapd
         state: started
         enabled: yes
-      when: ansible_facts['os_family'] != 'Darwin'
+      when: ansible_facts['os_family'] == 'Debian'
       ignore_errors: yes
 
 
-    tasks:
-    - name: Set roles
-      ansible.builtin.set_fact:
-        run_roles: "{{ ansible_run_tags != ['all'] and ansible_run_tags or default_roles | difference(exclude_roles | default([])) }}"
-      tags:
-        - always
+    # tasks:
+    # - name: Set roles
+    #   set_fact:
+    #     run_roles: "{{ ansible_run_tags != ['all'] and ansible_run_tags or default_roles | difference(exclude_roles | default([])) }}"
+    #   tags:
+    #     - always
 
-    - name: Display roles
-      ansible.builtin.debug:
-        var: run_roles
-      tags:
-        - always
+    # - name: Display roles
+    #   debug:
+    #     var: run_roles
+    #   tags:
+    #     - always
 
     # - name: Run roles
-    #   ansible.builtin.include_role:
+    #   include_role:
     #     apply:
     #       tags:
     #         - "{{ roles_item }}"
@@ -122,7 +140,7 @@
     #   ignore_errors: true
 
     # - name: Run CLI roles (casks)
-    #   ansible.builtin.shell:
+    #   shell:
     #     cmd: "brew list {{ item }} || brew install --cask {{ item }}"
     #   loop_control:
     #     loop_var: item
@@ -133,7 +151,7 @@
     #     - alacritty
 
     - name: Run CLI roles for MacOS
-      ansible.builtin.shell:
+      shell:
         cmd: "brew list {{ item }} || brew install {{ item }}"
       loop_control:
         loop_var: item
@@ -183,7 +201,6 @@
         - zellij
         - fastfetch
         - zx
-
     - name: Run CLI roles for Linux
       apt:
         update_cache: true
@@ -235,47 +252,70 @@
       # register: task_result
       # until: not task_result.failed
       retries: 1
-      # when: ansible_facts['os_family'] == 'Linux'
+      when: ansible_facts['os_family'] == 'Debian'
+      ignore_errors: true
+
+    - name: Run CLI roles for Alpine Linux
+      apk:
+        name:
+          - mc
+          - coreutils
+          - jq
+          - nethogs
+          - fdupes
+          - lz4
+          - asciinema
+          - ncurses
+        state: present
+      when: ansible_facts['os_family'] == 'Alpine'
       ignore_errors: true
 
     # Handle secret keys, tokens, etc
+    - name: Check if vault file exists
+      stat:
+        path: "./group_vars/all.yml"
+      register: vault_file
+
     - name: Get env variables
-      ansible.builtin.include_vars:
+      include_vars:
         file: "./group_vars/all.yml"
         name: vars
+      when: vault_file.stat.exists
 
     # - name: Write Git user name to Git config
-    #   ansible.builtin.shell:
+    #   shell:
     #     cmd: "git config --global user.name {{ vars.git_creds.GIT_USER_NAME }}"
 
     # - name: Write Git user email to Git config
-    #   ansible.builtin.shell:
+    #   shell:
     #     cmd: "git config --global user.name {{ vars.git_creds.GIT_USER_EMAIL }}"
 
     - name: Write secret keys and tokens to profile
-      ansible.builtin.lineinfile:
+      lineinfile:
         path: "{{ansible_user_dir}}/.profile"
         line: 'export {{ item.key }}="{{ item.value }}"'
-      loop: "{{ vars.env_vars | dict2items }}"
+      loop: "{{ vars.env_vars | default({}) | dict2items }}"
+      when: vault_file.stat.exists and vars.env_vars is defined
+      ignore_errors: true
 
     # - name: Create private SSH key file
-    #   ansible.builtin.file:
+    #   file:
     #     path: "{{ansible_user_dir}}/.ssh/id_ed25519"
     #     state: touch
     #     mode: u=rw,g=r,o=r
 
     # - name: Create public SSH key file
-    #   ansible.builtin.file:
+    #   file:
     #     path: "{{ansible_user_dir}}/.ssh/id_ed25519.pub"
     #     state: touch
     #     mode: u=rw,g=r,o=r
 
     # - name: Print private SSH key file
-    #   ansible.builtin.lineinfile:
+    #   lineinfile:
     #     path: "{{ansible_user_dir}}/.ssh/id_ed25519"
     #     line: "{{vars.ssh_keys.id_ed25519}}"
 
     # - name: Print public SSH key file
-    #   ansible.builtin.lineinfile:
+    #   lineinfile:
     #     path: "{{ansible_user_dir}}/.ssh/id_ed25519.pub"
     #     line: "{{vars.ssh_keys.id_ed25519_pub}}"

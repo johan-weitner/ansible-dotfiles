@@ -1,6 +1,13 @@
 ---
+- name: Check if PowerShell is available
+  shell: command -v powershell.exe >/dev/null 2>&1 && echo "available" || echo "not available"
+  register: powershell_check
+  args:
+    executable: /bin/sh
+  changed_when: false
+
 - name: Configure Windows PowerShell ExecutionPolicy
-  ansible.builtin.shell: |
+  shell: |
     Set-ExecutionPolicy RemoteSigned -Force -Scope CurrentUser
     $CurrentPolicy = Get-ExecutionPolicy
     Write-Host ($CurrentPolicy -eq 'RemoteSigned')
@@ -8,3 +15,4 @@
   changed_when: ps_exec_result.stdout != 'True'
   args:
     executable: powershell.exe
+  when: powershell_check.stdout == "available"
